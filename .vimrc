@@ -136,7 +136,7 @@ let g:airline_powerline_fonts=1
 let g:airline#extensions#tabline#buffer_nr_show = 1
 
 " Show hard/soft tab status in bottom bar
-:let g:airline_section_b = '%{airline#util#wrap(airline#extensions#hunks#get_hunks(),0)}%{airline#util#wrap(airline#extensions#branch#get_head(),0)}%{ &expandtab?"  Tab:S":"  Tab:H"}xg'
+:let g:airline_section_b = '%{airline#util#wrap(airline#extensions#hunks#get_hunks(),0)}%{airline#util#wrap(airline#extensions#branch#get_head(),0)}%{ &expandtab?"  Tab:S":"  Tab:H"}'
 
 
 " Highlight trailing whitespace
