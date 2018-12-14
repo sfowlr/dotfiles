@@ -9,20 +9,26 @@ set autoindent
 imap jj <Esc>
 set cursorline
 set mouse=a
+set ttyfast
+
+" Detect number of CPU cores on linux/osx
+if !empty($NUMBER_OF_PROCESSORS)
+    let cores = $NUMBER_OF_PROCESSORS + 0
+elseif filereadable('/proc/cpuinfo')
+    let cores = system('grep -c ^processor /proc/cpuinfo') + 0
+elseif system("uname") == "Darwin\n"
+    let cores = system('sysctl -n hw.ncpu') + 0
+else
+    let cores = 1
+endif
+
+
 
 " Highlight search, unhighlight on double esc
 set hlsearch
 nnoremap <esc><esc> :silent! nohls<cr>
 
-" virtual tabstops using spaces
-"set shiftwidth=4
-"set softtabstop=4
-"set tabstop=8
-"set expandtab
-":highlight MixedIndent ctermbg=red guibg=red
-":2match MixedIndent /^[[:space:]]*\t/
-
-" allow toggling between local and default mode
+" allow toggling between hard and soft tabs, or setting using argument
 function TabToggle(...)
     if a:0 > 0
         let tabtype = a:1 " 0: switch to soft tabs, 1: switch to hard tabs
@@ -95,15 +101,18 @@ call vundle#begin()
 " let Vundle manage Vundle, required
 Plugin 'gmarik/Vundle.vim'
 " Add all your plugins here (note older versions of Vundle used Bundle instead of Plugin)
-Plugin 'severin-lemaignan/vim-minimap'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'tpope/vim-fugitive'
 Plugin 'scrooloose/nerdtree'
 Plugin 'morhetz/gruvbox'
 Plugin 'vim-airline/vim-airline'
-Plugin 'kien/ctrlp.vim'
-if has('python2') && (executable('catkin') || executable('catkin_make'))
-    Plugin 'taketwo/vim-ros'
+
+if cores > 1
+    Plugin 'severin-lemaignan/vim-minimap'
+    Plugin 'kien/ctrlp.vim'
+    if has('python2') && (executable('catkin') || executable('catkin_make'))
+        Plugin 'taketwo/vim-ros'
+    endif
 endif
 
 " All of your Plugins must be added before the following line
@@ -127,7 +136,7 @@ let g:airline_powerline_fonts=1
 let g:airline#extensions#tabline#buffer_nr_show = 1
 
 " Show hard/soft tab status in bottom bar
-:let g:airline_section_b = '%{airline#util#wrap(airline#extensions#hunks#get_hunks(),0)}%{airline#util#wrap(airline#extensions#branch#get_head(),0)}%{ &expandtab?"  Tab:S":"  Tab:H"}'
+:let g:airline_section_b = '%{airline#util#wrap(airline#extensions#hunks#get_hunks(),0)}%{airline#util#wrap(airline#extensions#branch#get_head(),0)}%{ &expandtab?"  Tab:S":"  Tab:H"}xg'
 
 
 " Highlight trailing whitespace
@@ -137,10 +146,21 @@ let g:airline#extensions#tabline#buffer_nr_show = 1
 :au InsertLeave * match ExtraWhitespace /\s\+$/
 
 
+
+" Performance enhancements for slow machines:
+if cores < 2
+    set lazyredraw
+    let g:airline_highlighting_cache=1 " Performance boost?
+    let g:airline_extensions = ['tabline']
+endif
+
+
 if !&diff " Actions to perform at start (except when opened as vimdiff)
     " Start NERDTree and Minimap on startup
-    autocmd VimEnter * NERDTree
-    autocmd VimEnter * Minimap
+    autocmd VimEnter * if exists(':NERDTree') | NERDTree | endif
+    if cores > 1
+        autocmd VimEnter * Minimap
+    endif
     " Go to previous (last accessed) window.
     autocmd VimEnter * wincmd w
     " Remap q to qa for quickly exiting
