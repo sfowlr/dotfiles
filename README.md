@@ -6,7 +6,7 @@ These are the dotfiles I use on a regular basis on development machines. They ge
 
 There's lots of different preferred ways to do this, depending on who you ask. Many involve shell scripts and lots of symlinks - this method requires no symlinks or scripts.
 
-** WARNING:** This method may overwrite any existing dotfiles. Make sure you back them up or append .bak to their filenames before following these instructions.
+** WARNING:** This method may overwrite any pre-existing dotfiles in your home directory that conflict with ones in this repository. Make sure you back them up or append .bak to their filenames before following these instructions.
 
 1. `$ cd ~`
 2. `$ git init`
